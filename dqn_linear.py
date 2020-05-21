@@ -32,8 +32,11 @@ class DQN(nn.Module):
     # Returns tensor([[left0exp, right0exp]...]).
     def forward(self, state):
         self.eval()
-        x = F.relu(self.bn1(self.fc1(state)))
-        x = F.relu(self.bn2(self.fc2(x)))
+        # x = F.relu(self.bn1(self.fc1(state)))
+        # x = F.relu(self.bn2(self.fc2(x)))
+        # TODO: Why is it slower training-wise without batch normalization?
+        x = F.relu(self.fc1(state))
+        x = F.relu(self.fc2(x))
         return self.fc3(x)
 
 
