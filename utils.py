@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import gym
 
 
-def plotLearning(x, scores, epsilons, filename, lines=None):
+def plot_learning(x, scores, epsilons, filename, lines=None):
     fig = plt.figure()
     ax = fig.add_subplot(111, label="1")
     ax2 = fig.add_subplot(111, label="2", frame_on=False)

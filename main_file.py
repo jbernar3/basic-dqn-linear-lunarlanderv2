@@ -1,9 +1,7 @@
 import gym
 from dqn_linear import Agent
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from utils import plotLearning
+from utils import plot_learning
 
 
 if __name__ == '__main__':
@@ -34,4 +32,4 @@ if __name__ == '__main__':
               'epsilon %.2f' % agent.epsilon)
     x = [i + 1 for i in range(n_games)]
     filename = 'lunar_lander.png'
-    plotLearning(x, scores, eps_history, filename)
+    plot_learning(x, scores, eps_history, filename)

@@ -13,6 +13,14 @@ from collections import namedtuple
 class DQN(nn.Module):
 
     def __init__(self, input_dims, fc1_dims, fc2_dims, n_actions, lr):
+        """
+        Initializes Deep Q-Network.
+        :param input_dims: the dimensions of the input
+        :param fc1_dims: the dimensions of output of first layer
+        :param fc2_dims: the dimensions of the output of the second layer
+        :param n_actions: number of actions in action space
+        :param lr: learning rate
+        """
         super(DQN, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
@@ -28,9 +36,13 @@ class DQN(nn.Module):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
 
-    # Called with either one element to determine next action or a batch for optimization.
-    # Returns tensor([[left0exp, right0exp]...]).
     def forward(self, state):
+        """
+        Forward for Q-Network, called with one element to determine next action or with a batch
+        for optimization.
+        :param state: the state
+        :return: a tensor representing the output of the last layer (raw, no activation)
+        """
         self.eval()
         # x = F.relu(self.bn1(self.fc1(state)))
         # x = F.relu(self.bn2(self.fc2(x)))
@@ -43,6 +55,18 @@ class DQN(nn.Module):
 class Agent:
     def __init__(self, gamma, epsilon, lr, input_dims, batch_size,
                  n_actions, max_mem_size=100000, eps_end=.01, eps_dec=5e-4):
+        """
+        Initialization of the Agent.
+        :param gamma: discount factor
+        :param epsilon: initial probability to explore rather than exploit
+        :param lr: the learning rate
+        :param input_dims: the dimensions of the inputs
+        :param batch_size: size of each batch
+        :param n_actions: number of actions in action space
+        :param max_mem_size: the maximum size of memory to store
+        :param eps_end: the ending probability to explore
+        :param eps_dec: linear decrement of epsilon
+        """
         self.gamma = gamma
         self.epsilon = epsilon
         self.lr = lr
@@ -61,6 +85,14 @@ class Agent:
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
 
     def store_transition(self, state, action, reward, state_, done):
+        """
+        Store a transition in memory.
+        :param state: the current state
+        :param action: action taken
+        :param reward: reward gained
+        :param state_: the next state
+        :param done: flag indicating whether terminal state or not
+        """
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
         self.new_state_memory[index] = state_
@@ -71,6 +103,11 @@ class Agent:
         self.mem_cntr += 1
 
     def choose_action(self, observation):
+        """
+        Choosing an action given an observation.
+        :param observation: the current observation of the state
+        :return: greedy action with probability of epsilon, random action otherwise
+        """
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation]).float().to(self.Q_eval.device)
             actions = self.Q_eval.forward(state)
@@ -80,6 +117,9 @@ class Agent:
         return action
 
     def learn(self):
+        """
+        Method for agent to learn.
+        """
         if self.mem_cntr < self.batch_size:
             return
 
@@ -99,6 +139,7 @@ class Agent:
 
         q_eval = self.Q_eval.forward(state_batch)[batch_index, action_batch]
         q_next = self.Q_eval.forward(new_state_batch)
+
         q_next[terminal_batch] = 0.0
 
         q_target = reward_batch + self.gamma * torch.max(q_next, dim=1)[0]
